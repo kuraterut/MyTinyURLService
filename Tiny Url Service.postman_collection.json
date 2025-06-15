@@ -1,0 +1,82 @@
+{
+	"info": {
+		"_postman_id": "d9e4bc22-ffd9-4217-bd12-578e2b8fb6ba",
+		"name": "Tiny Url Service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41796391"
+	},
+	"item": [
+		{
+			"name": "Create Tiny Url",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"originalUrl\": \"https://ru.wikipedia.org/?l\",\r\n    \"alias\" : \"wiki\",\r\n    \"expiresAt\" : \"2025-07-14T23:59:59\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/tinyurl",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"tinyurl"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Url Info By Tiny",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/tinyurl/wiki",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"tinyurl",
+						"wiki"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Redirect by tiny url",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/tinyurl/wiki/redirect",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"tinyurl",
+						"wiki",
+						"redirect"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
