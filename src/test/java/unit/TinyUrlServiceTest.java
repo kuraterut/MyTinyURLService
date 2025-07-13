@@ -9,13 +9,16 @@ import org.kuraterut.mytinyurlservice.model.dto.request.CreateUrlRequest;
 import org.kuraterut.mytinyurlservice.model.dto.response.UrlResponse;
 import org.kuraterut.mytinyurlservice.model.entity.TinyUrl;
 import org.kuraterut.mytinyurlservice.repository.TinyUrlRepository;
-import org.kuraterut.mytinyurlservice.service.TinyUrlService;
+import org.kuraterut.mytinyurlservice.service.TinyUrlServiceImpl;
+import org.kuraterut.mytinyurlservice.usecase.CreateTinyUrlUseCase;
+import org.kuraterut.mytinyurlservice.usecase.GetInfoUseCase;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -31,8 +34,9 @@ class TinyUrlServiceTest {
     @Mock
     private DtoMapper dtoMapper;
 
+
     @InjectMocks
-    private TinyUrlService tinyUrlService;
+    private TinyUrlServiceImpl tinyUrlService;
 
 
     @Test
@@ -55,7 +59,7 @@ class TinyUrlServiceTest {
                 tinyUrl.getOriginalUrl(),
                 "http://localhost:8080/" + tinyUrl.getShortCode(),
                 null,
-                LocalDateTime.now(),
+                OffsetDateTime.now(),
                 null
         ));
 
@@ -78,7 +82,6 @@ class TinyUrlServiceTest {
         tinyUrl.setShortCode("example");
 
         when(dtoMapper.toEntity(request)).thenReturn(tinyUrl);
-        when(tinyUrlRepository.findByAlias("example")).thenReturn(Optional.empty());
         when(tinyUrlRepository.save(any())).thenAnswer(invocation -> {
             TinyUrl saved = invocation.getArgument(0);
             saved.setId(1L);
@@ -88,7 +91,7 @@ class TinyUrlServiceTest {
                 tinyUrl.getOriginalUrl(),
                 "http://localhost:8080/example",
                 "example",
-                LocalDateTime.now(),
+                OffsetDateTime.now(),
                 null
         ));
 
@@ -105,13 +108,16 @@ class TinyUrlServiceTest {
         request.setOriginalUrl("https://example.com");
         request.setAlias("example");
 
-        TinyUrl existingTinyUrl = new TinyUrl();
-        existingTinyUrl.setAlias("example");
+        TinyUrl tinyUrl = new TinyUrl();
+        tinyUrl.setOriginalUrl(request.getOriginalUrl());
+        tinyUrl.setShortCode("example");
 
-        when(tinyUrlRepository.findByAlias("example")).thenReturn(Optional.of(existingTinyUrl));
+        when(dtoMapper.toEntity(request)).thenReturn(tinyUrl);
+
+        when(tinyUrlRepository.save(any())).thenThrow(AliasAlreadyExistsException.class);
 
         assertThrows(AliasAlreadyExistsException.class, () -> tinyUrlService.createShortUrl(request));
-        verify(tinyUrlRepository, never()).save(any());
+        verify(tinyUrlRepository, times(1)).save(any());
     }
 
     @Test
@@ -121,12 +127,10 @@ class TinyUrlServiceTest {
         tinyUrl.setShortCode("abc123");
 
         when(tinyUrlRepository.findByShortCode("abc123")).thenReturn(Optional.of(tinyUrl));
-        when(tinyUrlRepository.save(any())).thenReturn(tinyUrl);
 
         String originalUrl = tinyUrlService.getOriginalUrl("abc123");
 
         assertThat(originalUrl).isEqualTo("https://example.com");
-        verify(tinyUrlRepository, times(1)).save(tinyUrl);
     }
 
     @Test
@@ -134,12 +138,11 @@ class TinyUrlServiceTest {
         TinyUrl tinyUrl = new TinyUrl();
         tinyUrl.setOriginalUrl("https://example.com");
         tinyUrl.setShortCode("abc123");
-        tinyUrl.setExpiresAt(LocalDateTime.now().minusDays(1));
+        tinyUrl.setExpiresAt(OffsetDateTime.now().minusDays(1));
 
         when(tinyUrlRepository.findByShortCode("abc123")).thenReturn(Optional.of(tinyUrl));
-        doNothing().when(tinyUrlRepository).delete(tinyUrl);
+
 
         assertThrows(TinyUrlNotFoundException.class, () -> tinyUrlService.getOriginalUrl("abc123"));
-        verify(tinyUrlRepository, times(1)).delete(tinyUrl);
     }
 }

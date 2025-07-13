@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -13,6 +14,6 @@ public class UrlResponse {
     private String originalUrl;
     private String shortUrl;
     private String alias;
-    private LocalDateTime createdAt;
-    private LocalDateTime expiresAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime expiresAt;
 }

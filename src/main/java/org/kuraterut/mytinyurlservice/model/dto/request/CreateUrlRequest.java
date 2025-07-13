@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -18,5 +19,5 @@ public class CreateUrlRequest {
 
     private String alias;
 
-    private LocalDateTime expiresAt;
+    private OffsetDateTime expiresAt;
 }
